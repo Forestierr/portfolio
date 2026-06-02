@@ -3,9 +3,12 @@ import {
 	Languages,
 	Link as Linkedin,
 	Mail,
+	Menu,
 	Terminal,
+	X,
 } from "lucide-react";
 import type React from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 
@@ -16,64 +19,107 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
 	const { t, i18n } = useTranslation();
 	const location = useLocation();
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const currentPath = location.pathname === "/" ? "~" : `~${location.pathname}`;
 
 	const toggleLanguage = () => {
 		i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
 	};
 
+	const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+	const closeMenu = () => setIsMenuOpen(false);
+
+	const navLinks = [
+		{ to: "/", label: t("nav.home") },
+		{ to: "/projects", label: t("nav.projects") },
+		{ to: "/blog", label: t("nav.blog") },
+		{ to: "/terminal", label: t("nav.terminal") },
+	];
+
 	return (
 		<div className="min-h-screen bg-black text-white p-4 md:p-8 font-mono flex flex-col">
 			{/* Terminal Header Bar */}
-			<header className="border-2 border-white p-2 mb-8 flex justify-between items-center sticky top-4 bg-black z-10">
-				<div className="flex items-center gap-2">
-					<Terminal size={20} />
-					<span className="font-bold hidden sm:inline">
-						DEV_TERMINAL v{new Date().getDay()}.{new Date().getMonth()}.
-						{new Date().getFullYear()}
-					</span>
-					<span className="text-gray-400">|</span>
-					<span className="animate-pulse">●</span>
+			<header className="border-2 border-white p-2 mb-8 sticky top-4 bg-black z-30">
+				<div className="flex justify-between items-center">
+					<div className="flex items-center gap-2">
+						<Terminal size={20} />
+						<span className="font-bold hidden sm:inline">
+							DEV_TERMINAL v{new Date().getDay()}.{new Date().getMonth()}.
+							{new Date().getFullYear()}
+						</span>
+						<span className="text-gray-400">|</span>
+						<span className="animate-pulse">●</span>
+					</div>
+
+					{/* Desktop Navigation */}
+					<nav className="hidden md:flex gap-4 items-center">
+						{navLinks.map((link) => (
+							<Link
+								key={link.to}
+								to={link.to}
+								className={`terminal-link ${
+									location.pathname === link.to ||
+									(link.to !== "/" && location.pathname.startsWith(link.to))
+										? "bg-white text-black"
+										: ""
+								}`}
+							>
+								{link.label}
+							</Link>
+						))}
+						<button
+							type="button"
+							onClick={toggleLanguage}
+							className="terminal-link flex items-center gap-1 uppercase font-bold text-xs ml-2 border border-white px-1 hover:bg-white hover:text-black"
+						>
+							<Languages size={14} /> {i18n.language}
+						</button>
+					</nav>
+
+					{/* Mobile Menu Button */}
+					<div className="flex md:hidden items-center gap-3">
+						<button
+							type="button"
+							onClick={toggleLanguage}
+							className="terminal-link flex items-center gap-1 uppercase font-bold text-xs border border-white px-1"
+						>
+							<Languages size={14} /> {i18n.language}
+						</button>
+						<button
+							type="button"
+							onClick={toggleMenu}
+							className="terminal-link p-1 border-2 border-white"
+						>
+							{isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+						</button>
+					</div>
 				</div>
 
-				<nav className="flex gap-4 items-center">
-					<Link
-						to="/"
-						className={`terminal-link ${location.pathname === "/" ? "bg-white text-black" : ""}`}
-					>
-						{t("nav.home")}
-					</Link>
-					<Link
-						to="/projects"
-						className={`terminal-link ${location.pathname === "/projects" ? "bg-white text-black" : ""}`}
-					>
-						{t("nav.projects")}
-					</Link>
-					<Link
-						to="/blog"
-						className={`terminal-link ${location.pathname.startsWith("/blog") ? "bg-white text-black" : ""}`}
-					>
-						{t("nav.blog")}
-					</Link>
-					<Link
-						to="/terminal"
-						className={`terminal-link ${location.pathname === "/terminal" ? "bg-white text-black" : ""}`}
-					>
-						{t("nav.terminal")}
-					</Link>
-					<button
-						type="button"
-						onClick={toggleLanguage}
-						className="terminal-link flex items-center gap-1 uppercase font-bold text-xs ml-2 border border-white px-1 hover:bg-white hover:text-black"
-					>
-						<Languages size={14} /> {i18n.language}
-					</button>
-				</nav>
+				{/* Mobile Navigation Dropdown */}
+				{isMenuOpen && (
+					<nav className="flex flex-col gap-2 mt-4 pt-4 border-t-2 border-white md:hidden animate-in slide-in-from-top duration-200">
+						{navLinks.map((link) => (
+							<Link
+								key={link.to}
+								to={link.to}
+								onClick={closeMenu}
+								className={`terminal-link text-lg py-2 ${
+									location.pathname === link.to ||
+									(link.to !== "/" && location.pathname.startsWith(link.to))
+										? "bg-white text-black"
+										: ""
+								}`}
+							>
+								{link.label}
+							</Link>
+						))}
+					</nav>
+				)}
 			</header>
 
 			{/* Main Content Area */}
-			<main className="flex-grow max-w-5xl mx-auto w-full border-x-0 md:border-x-2 border-white px-4 md:px-12 py-8 relative">
-				<div className="absolute top-0 right-4 text-xs text-gray-500 py-2">
+			<main className="flex-grow max-w-5xl mx-auto w-full border-x-0 md:border-x-2 border-white px-2 sm:px-4 md:px-12 py-8 relative">
+				<div className="absolute top-0 right-4 text-[10px] sm:text-xs text-gray-500 py-2">
 					LOC: {currentPath}
 				</div>
 				{children}

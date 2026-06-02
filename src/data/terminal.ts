@@ -71,6 +71,21 @@ export const VFS: Record<string, FileSystemNode> = {
 			},
 		},
 	},
+	bin: {
+		type: "dir",
+		permissions: "drwxr-xr-x",
+		size: "4.0K",
+		date: "May 01 00:00",
+		children: {
+			"camera.sh": {
+				type: "file",
+				permissions: "-rwxr-xr-x",
+				size: "1.2K",
+				date: "Jun 02 14:30",
+				content: "# ASCII Camera Script\nexec camera-stream --ascii",
+			},
+		},
+	},
 	etc: {
 		type: "dir",
 		permissions: "drwxr-xr-x",
@@ -147,6 +162,12 @@ export const COMMAND_MANUALS: Record<string, string[]> = {
 		"Usage: goto [home|projects|blog]",
 	],
 	lang: ["lang - change the system language", "Usage: lang [fr|en]"],
+	"camera.sh": [
+		"camera.sh - ASCII webcam stream",
+		"Usage: camera.sh",
+		"Controls:",
+		"  q  quit camera stream",
+	],
 };
 
 export const ROOB_ASCII = [

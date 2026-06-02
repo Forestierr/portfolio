@@ -173,6 +173,54 @@ app.delete("/api/blog/:id", async (req, res) => {
 	res.status(204).end();
 });
 
+// Sitemap Endpoint
+app.get("/sitemap.xml", async (req, res) => {
+	const data = await readData();
+	const baseUrl = process.env.BASE_URL || `http://${req.headers.host}`;
+
+	const filteredProjects = data.projects.filter((p) => p.isDraft !== true);
+	const filteredBlogPosts = data.blogPosts.filter((p) => p.isDraft !== true);
+
+	const lastProjectDate =
+		filteredProjects.length > 0
+			? filteredProjects.reduce(
+					(max, p) => (p.date > max ? p.date : max),
+					"2024-01-01",
+				)
+			: new Date().toISOString().split("T")[0];
+
+	const blogEntries = filteredBlogPosts.map(
+		(p) =>
+			`<url><loc>${baseUrl}/blog/${p.slug}</loc><lastmod>${p.date || new Date().toISOString().split("T")[0]}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`,
+	);
+
+	const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/projects</loc>
+    <lastmod>${lastProjectDate}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/blog</loc>
+    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  ${blogEntries.join("\n  ")}
+</urlset>`;
+
+	res.header("Content-Type", "application/xml");
+	res.send(sitemap);
+});
+
 // Fallback to index.html for SPA routing (Production)
 app.get("/*splat", (req, res, next) => {
 	if (!req.path.startsWith("/api")) {

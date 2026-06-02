@@ -8,12 +8,12 @@ interface ProjectCardProps {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
 	return (
-		<div className="border-2 border-white p-6 hover:bg-white hover:text-black transition-all duration-300 group">
-			<div className="flex justify-between items-start mb-4">
-				<h3 className="text-xl font-bold uppercase tracking-tighter">
+		<div className="border-2 border-white p-4 sm:p-6 hover:bg-white hover:text-black transition-all duration-300 group">
+			<div className="flex justify-between items-start mb-4 gap-2">
+				<h3 className="text-lg sm:text-xl font-bold uppercase tracking-tighter">
 					{project.title}
 				</h3>
-				<div className="flex gap-3">
+				<div className="flex gap-3 pt-1">
 					{project.repo && (
 						<a
 							href={project.repo}

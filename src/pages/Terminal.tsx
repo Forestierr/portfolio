@@ -2,6 +2,8 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import SEO from "../components/SEO";
+import CameraView from "../components/terminal/CameraView";
 import HtopView from "../components/terminal/HtopView";
 import MoonView from "../components/terminal/MoonView";
 import TerminalHistory from "../components/terminal/TerminalHistory";
@@ -19,7 +21,7 @@ const MAX_HISTORY_LINES = 100;
 const Terminal: React.FC = () => {
 	const { t, i18n } = useTranslation();
 	const [history, setHistory] = useState<
-		{ input?: string; output: string[] }[]
+		{ input?: string; output: string[]; path?: string[] }[]
 	>([]);
 
 	// Initial welcome message
@@ -42,6 +44,7 @@ const Terminal: React.FC = () => {
 	const [isMatrix, setIsMatrix] = useState(false);
 	const [isHtop, setIsHtop] = useState(false);
 	const [isMoon, setIsMoon] = useState(false);
+	const [isCamera, setIsCamera] = useState(false);
 	const [moonFrame, setMoonFrame] = useState(0);
 	const [commandHistory, setCommandHistory] = useState<string[]>([]);
 	const [historyPointer, setHistoryPointer] = useState(-1);
@@ -74,7 +77,7 @@ const Terminal: React.FC = () => {
 	}, []);
 
 	useEffect(() => {
-		let interval: any;
+		let interval: ReturnType<typeof setInterval>;
 		if (isHtop) {
 			interval = setInterval(() => {
 				setHtopStats((prev) => ({
@@ -100,7 +103,7 @@ const Terminal: React.FC = () => {
 	}, [isHtop]);
 
 	useEffect(() => {
-		let interval: any;
+		let interval: ReturnType<typeof setInterval>;
 		if (isMoon) {
 			interval = setInterval(() => {
 				setMoonFrame((prev) => (prev + 1) % MOON_FRAMES.length);
@@ -152,16 +155,55 @@ const Terminal: React.FC = () => {
 		return result;
 	};
 
+	const resolvePath = (pathArg: string): string[] | null => {
+		if (!pathArg || pathArg === "~") return ["home", "visitor"];
+		if (pathArg === "/") return [];
+
+		const newPath = pathArg.startsWith("/") ? [] : [...currentPath];
+		const segments = pathArg
+			.split("/")
+			.filter((s) => s.length > 0 && s !== ".");
+
+		for (const segment of segments) {
+			if (segment === "..") {
+				if (newPath.length > 0) newPath.pop();
+			} else {
+				newPath.push(segment);
+			}
+		}
+		return newPath;
+	};
+
 	const handleAutocomplete = () => {
 		const parts = input.split(" ");
 		const lastPart = parts[parts.length - 1];
-		const dir = getDir(currentPath);
+
+		// Handle path-based autocomplete (e.g., cd home/vis[TAB])
+		const lastSlashIndex = lastPart.lastIndexOf("/");
+		const dirPart =
+			lastSlashIndex !== -1 ? lastPart.slice(0, lastSlashIndex) : "";
+		const prefix =
+			lastSlashIndex !== -1 ? lastPart.slice(lastSlashIndex + 1) : lastPart;
+
+		// Resolve the directory to look in
+		const dirPathToSearch =
+			lastSlashIndex !== -1
+				? resolvePath(dirPart || (lastPart.startsWith("/") ? "/" : "."))
+				: currentPath;
+
+		if (!dirPathToSearch) return;
+
+		const dir = getDir(dirPathToSearch);
 		if (dir?.children) {
 			const matches = Object.keys(dir.children).filter((name) =>
-				name.startsWith(lastPart),
+				name.startsWith(prefix),
 			);
 			if (matches.length === 1) {
-				parts[parts.length - 1] = matches[0];
+				const completion = matches[0];
+				const newLastPart =
+					lastSlashIndex !== -1 ? `${dirPart}/${completion}` : completion;
+
+				parts[parts.length - 1] = newLastPart;
 				const newInput = parts.join(" ");
 				setInput(newInput);
 				setTimeout(() => {
@@ -223,6 +265,7 @@ const Terminal: React.FC = () => {
 		const cmd = parts[0].toLowerCase();
 		const args = parts.slice(1);
 		let output: string[] = [];
+		const snapshotPath = [...currentPath];
 
 		setCommandHistory((prev) => [...prev, cmdStr]);
 		setHistoryPointer(-1);
@@ -261,11 +304,15 @@ const Terminal: React.FC = () => {
 						if (arg.includes("l")) longFormat = true;
 					} else targetArg = arg;
 				});
-				const targetPath = targetArg
-					? targetArg.startsWith("/")
-						? targetArg.split("/").filter((x) => x)
-						: [...currentPath, ...targetArg.split("/").filter((x) => x)]
-					: currentPath;
+
+				const targetPath = targetArg ? resolvePath(targetArg) : currentPath;
+				if (!targetPath) {
+					output = [
+						`ls: cannot access '${targetArg}': No such file or directory`,
+					];
+					break;
+				}
+
 				const dir = getDir(targetPath);
 				if (dir && dir.type === "dir" && dir.children) {
 					const entries = Object.entries(dir.children);
@@ -301,6 +348,9 @@ const Terminal: React.FC = () => {
 			case "htop":
 				setIsHtop(true);
 				return;
+			case "camera.sh":
+				setIsCamera(true);
+				return;
 			case "ping": {
 				const host = args[0] || "google.com";
 				output = [`PING ${host} (142.250.190.46): 56 data bytes`];
@@ -333,30 +383,31 @@ const Terminal: React.FC = () => {
 				return;
 			}
 			case "cd": {
-				if (!args[0] || args[0] === "~") setCurrentPath(["home", "visitor"]);
-				else if (args[0] === "..") {
-					if (currentPath.length > 0) setCurrentPath(currentPath.slice(0, -1));
-				} else if (args[0] === "/") setCurrentPath([]);
-				else {
-					const target = [
-						...currentPath,
-						...args[0].split("/").filter((x) => x),
-					];
-					const dir = getDir(target);
-					if (dir && dir.type === "dir") setCurrentPath(target);
-					else output = [`cd: ${args[0]}: No such directory`];
+				const targetPath = resolvePath(args[0]);
+				if (targetPath) {
+					const dir = getDir(targetPath);
+					if (dir && dir.type === "dir") {
+						setCurrentPath(targetPath);
+					} else {
+						output = [`cd: ${args[0]}: No such directory`];
+					}
+				} else {
+					output = [`cd: ${args[0]}: No such directory`];
 				}
 				break;
 			}
 			case "cat": {
-				const targetPath = args[0]?.split("/").filter((x) => x);
-				const absoluteTarget = args[0]?.startsWith("/")
-					? targetPath
-					: [...currentPath, ...targetPath];
-				const node = getDir(absoluteTarget);
-				if (node && node.type === "file")
-					output = node.content?.split("\n") || [];
-				else output = [`cat: ${args[0]}: No such file`];
+				const targetPath = resolvePath(args[0]);
+				if (targetPath) {
+					const node = getDir(targetPath);
+					if (node && node.type === "file") {
+						output = node.content?.split("\n") || [];
+					} else {
+						output = [`cat: ${args[0]}: No such file`];
+					}
+				} else {
+					output = [`cat: ${args[0]}: No such file`];
+				}
 				break;
 			}
 			case "lang":
@@ -395,25 +446,39 @@ const Terminal: React.FC = () => {
 		}
 
 		setHistory((prev) => {
-			const newHistory = [...prev, { input: cmdStr, output }];
+			const newHistory = [
+				...prev,
+				{ input: cmdStr, output, path: snapshotPath },
+			];
 			return newHistory.slice(-MAX_HISTORY_LINES);
 		});
 	};
 
 	return (
 		<div
-			className={`min-h-[75vh] max-h-[75vh] border-2 border-white p-4 font-mono text-sm flex flex-col transition-all duration-1000 ${isMatrix ? "bg-green-950 text-green-400 border-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)]" : "bg-black text-white"}`}
+			className={`min-h-[60vh] md:min-h-[75vh] max-h-[85vh] md:max-h-[75vh] border-2 border-white p-2 md:p-4 font-mono text-[10px] sm:text-xs md:text-sm flex flex-col transition-all duration-1000 ${isMatrix ? "bg-green-950 text-green-400 border-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)]" : "bg-black text-white"}`}
 			onClick={() => inputRef.current?.focus()}
 		>
+			<SEO title={t("nav.terminal").replace("[", "").replace("]", "")} />
 			{isHtop ? (
 				<HtopView stats={htopStats} />
 			) : isMoon ? (
 				<MoonView frame={MOON_FRAMES[moonFrame]} />
+			) : isCamera ? (
+				<CameraView
+					onClose={() => {
+						setIsCamera(false);
+						setHistory((prev) => [
+							...prev,
+							{ output: ["Camera stream closed."] },
+						]);
+					}}
+				/>
 			) : (
 				<div className="flex flex-col h-full overflow-hidden">
 					<div
 						ref={scrollRef}
-						className="flex-grow overflow-y-auto mb-2 pr-2 custom-scrollbar flex flex-col justify-end"
+						className="flex-grow overflow-y-auto mb-2 pr-1 sm:pr-2 custom-scrollbar flex flex-col justify-end"
 					>
 						<TerminalHistory
 							history={history}

@@ -1,10 +1,15 @@
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
 import TerminalPrompt from "../components/TerminalPrompt";
 
 const ServerError: React.FC = () => {
+	const { t } = useTranslation();
+
 	return (
 		<div className="animate-in fade-in duration-500">
+			<SEO title={t("seo.error_500_title")} />
 			<TerminalPrompt path="/sys/kernel">
 				<span className="text-red-500 font-bold">tail -f /var/log/syslog</span>
 			</TerminalPrompt>

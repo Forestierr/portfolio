@@ -1,13 +1,16 @@
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import AdminBlogForm from "../components/admin/AdminBlogForm";
 import AdminHeader from "../components/admin/AdminHeader";
 import AdminItemList from "../components/admin/AdminItemList";
 import AdminProjectForm from "../components/admin/AdminProjectForm";
+import SEO from "../components/SEO";
 import type { BlogPost, Project } from "../types";
 
 const AdminDashboard: React.FC = () => {
+	const { t } = useTranslation();
 	const [activeTab, setActiveTab] = useState<"projects" | "blog">("projects");
 	const [status, setStatus] = useState("");
 	const [projects, setProjects] = useState<Project[]>([]);
@@ -264,6 +267,7 @@ const AdminDashboard: React.FC = () => {
 
 	return (
 		<div className="space-y-8 pb-20">
+			<SEO title={t("seo.admin_title")} />
 			<AdminHeader
 				activeTab={activeTab}
 				setActiveTab={setActiveTab}

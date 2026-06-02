@@ -1,12 +1,20 @@
 import type React from "react";
-import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Link, useLocation } from "react-router-dom";
+import SEO from "../components/SEO";
 import TerminalPrompt from "../components/TerminalPrompt";
 
 const NotFound: React.FC = () => {
+	const { t } = useTranslation();
+	const location = useLocation();
+
 	return (
 		<div className="animate-in fade-in duration-500">
+			<SEO title={t("seo.error_404_title")} />
 			<TerminalPrompt path="/errors">
-				<span className="text-red-500 font-bold">curl --head /this-page</span>
+				<span className="text-red-500 font-bold">
+					curl --head {location.pathname}
+				</span>
 			</TerminalPrompt>
 
 			<div className="mt-8 space-y-6">

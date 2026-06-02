@@ -3,6 +3,7 @@ import type React from "react";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, useParams } from "react-router-dom";
 import MarkdownRenderer from "../components/MarkdownRenderer";
+import SEO from "../components/SEO";
 import TerminalPrompt from "../components/TerminalPrompt";
 import { useFetch } from "../hooks/useFetch";
 import type { BlogPost as BlogPostType } from "../types";
@@ -26,10 +27,12 @@ const BlogPost: React.FC = () => {
 
 	const lang = i18n.language as "en" | "fr";
 	const title = post.translations?.[lang]?.title || post.title;
+	const summary = post.translations?.[lang]?.summary || post.summary;
 	const content = post.translations?.[lang]?.content || post.content;
 
 	return (
 		<div className="space-y-8 pb-20">
+			<SEO title={title} description={summary} article />
 			<Link
 				to="/blog"
 				className="terminal-link inline-flex items-center gap-2 mb-4 uppercase text-sm font-bold"
@@ -42,13 +45,13 @@ const BlogPost: React.FC = () => {
 					<span className="text-white">cat article.md</span>
 				</TerminalPrompt>
 
-				<div className="mt-8 pl-0 md:pl-8">
-					<header className="mb-12 border-b-2 border-white/20 pb-8">
-						<h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6">
+				<div className="mt-8 pl-0 sm:pl-4 md:pl-8">
+					<header className="mb-8 md:mb-12 border-b-2 border-white/20 pb-8">
+						<h1 className="text-2xl sm:text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6 leading-tight">
 							{title}
 						</h1>
 
-						<div className="flex flex-wrap gap-6 text-sm opacity-60">
+						<div className="flex flex-wrap gap-4 md:gap-6 text-xs opacity-60">
 							<div className="flex items-center gap-2">
 								<Calendar size={16} /> {post.date}
 							</div>

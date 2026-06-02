@@ -1,9 +1,12 @@
 import type React from "react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import SEO from "../components/SEO";
 import TerminalPrompt from "../components/TerminalPrompt";
 
 const AdminLogin: React.FC = () => {
+	const { t } = useTranslation();
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
 	const navigate = useNavigate();
@@ -32,6 +35,7 @@ const AdminLogin: React.FC = () => {
 
 	return (
 		<div className="max-w-md mx-auto mt-20 p-8 border-2 border-white">
+			<SEO title={t("seo.admin_title")} />
 			<TerminalPrompt path="/etc/auth">
 				<span className="text-white">login --admin</span>
 			</TerminalPrompt>

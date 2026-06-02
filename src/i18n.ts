@@ -12,6 +12,18 @@ const resources = {
 				terminal: "[Terminal]",
 				admin: "[Admin]",
 			},
+			seo: {
+				site_name: "Portfolio",
+				default_title: "Fullstack Developer",
+				default_description:
+					"Fullstack developer passionate about building efficient, scalable, and minimalist software. Specialist in React and TypeScript.",
+				home_title: "Home",
+				projects_title: "Projects",
+				blog_title: "Blog",
+				admin_title: "Admin",
+				error_404_title: "Page Not Found",
+				error_500_title: "Internal Server Error",
+			},
 			common: {
 				loading: "Loading_Data...",
 				searching: "Searching_Articles...",
@@ -57,6 +69,18 @@ const resources = {
 				blog: "[Blog]",
 				terminal: "[Terminal]",
 				admin: "[Admin]",
+			},
+			seo: {
+				site_name: "Portfolio",
+				default_title: "Développeur Fullstack",
+				default_description:
+					"Développeur fullstack passionné par la création de logiciels efficaces, évolutifs et minimalistes. Spécialiste React et TypeScript.",
+				home_title: "Accueil",
+				projects_title: "Projets",
+				blog_title: "Blog",
+				admin_title: "Admin",
+				error_404_title: "Page Introuvable",
+				error_500_title: "Erreur Serveur",
 			},
 			common: {
 				loading: "Chargement_Données...",

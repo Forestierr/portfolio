@@ -79,8 +79,20 @@ const HtopView: React.FC<HtopViewProps> = ({ stats }) => {
 					</tr>
 				</tbody>
 			</table>
-			<div className="mt-4 text-[10px] opacity-60 uppercase font-bold">
-				Press 'q' to quit htop
+			<div className="mt-4 flex justify-between items-center">
+				<div className="text-[10px] opacity-60 uppercase font-bold hidden sm:block">
+					Press 'q' to quit htop
+				</div>
+				<button
+					type="button"
+					onClick={() => {
+						const event = new KeyboardEvent("keydown", { key: "q" });
+						window.dispatchEvent(event);
+					}}
+					className="sm:hidden terminal-button text-[10px] py-1 px-3 uppercase font-bold"
+				>
+					[ Quit_Htop ]
+				</button>
 			</div>
 		</div>
 	);

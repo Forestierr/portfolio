@@ -1,0 +1,50 @@
+{
+	"projects": [
+		{
+			"id": "1",
+			"title": "TERMINAL_OS_CLONE",
+			"description": "A fully functional terminal emulator built with React and Xterm.js. Supports custom commands and file system simulation.",
+			"tags": ["React", "TypeScript", "Xterm.js"],
+			"link": "https://example.com/project1",
+			"repo": "https://github.com/user/project1",
+			"date": "2024-03"
+		},
+		{
+			"id": "2",
+			"title": "MINIMAL_MARKDOWN_PARSER",
+			"description": "High-performance markdown to HTML converter with support for custom terminal-style extensions.",
+			"tags": ["Node.js", "AST", "Regex"],
+			"link": "https://example.com/project2",
+			"date": "2024-01"
+		},
+		{
+			"id": "3",
+			"title": "NEO_VIM_CONFIG_GEN",
+			"description": "Interactive CLI tool to generate optimized Lua configurations for Neovim based on user preferences.",
+			"tags": ["Go", "CLI", "Lua"],
+			"link": "https://example.com/project3",
+			"repo": "https://github.com/user/project3",
+			"date": "2023-11"
+		}
+	],
+	"blogPosts": [
+		{
+			"id": "1",
+			"slug": "why-monochrome-matters",
+			"title": "The Philosophy of Monochrome Design",
+			"summary": "Exploring why reducing color can increase focus and clarity in developer tools.",
+			"content": "# The Philosophy of Monochrome Design\n\nIn a world full of distractions and vibrant colors, monochrome design stands as a pillar of focus. \nWhen we remove the noise of color, we are left with the core of the experience: **content and structure**.\n\n## Why Developers Love Terminals\nThe terminal isn't just a tool; it's an environment where the interface is minimal, and the feedback loop is direct. \n\n### Key Benefits:\n1. **Reduced Cognitive Load**: No need to process complex visual cues.\n2. **High Contrast**: White on black (or green on black) provides maximum readability.\n3. **Consistency**: A terminal looks and behaves the same way across different systems.\n\nThis portfolio aims to capture that essence. It's not about being \"retro\"; it's about being **efficient**.",
+			"date": "2024-05-20",
+			"readTime": "5 min"
+		},
+		{
+			"id": "2",
+			"slug": "mastering-the-cli",
+			"title": "Mastering the CLI Workflow",
+			"summary": "Tips and tricks for building your own CLI tools using modern technologies.",
+			"content": "# Mastering the CLI Workflow\n\nBuilding a CLI tool is one of the most rewarding experiences for a developer. \n\n## The Stack\nI personally prefer using **Go** or **Node.js** for building CLI applications. \n\n- **Go**: Great for binaries and performance.\n- **Node.js (oclif/commander)**: Excellent ecosystem and ease of development.\n\nStay tuned for a deep dive into building a custom shell.",
+			"date": "2024-04-15",
+			"readTime": "8 min"
+		}
+	]
+}
